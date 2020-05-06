@@ -52,7 +52,12 @@ int ldr(void);
 
 bool is_clique(const subgraph);
 int size(const subgraph);
-int min_deg(const subgraph);
+int min_deg(const subgraph, int*);
+void reset_degrees(const subgraph, int*);
+
+void add_vertex(vertex, subgraph, int*);
+void remove_vertex(vertex, subgraph, int*);
+
 int deg(vertex, const subgraph);
 
 #define READ_INT_ARG(idx, name) \
@@ -83,6 +88,8 @@ int main(int argc, char *argv[])
 
 	for (int k = min_k; k <= max_k; ++k) {
 		fprintf(stderr, "Running with %d-cliques.\n", k);
+
+		total_sizes[k] = 0;
 		dotimes(trials) {
 			randomize_graph(0.5);
 			plant_clique(k);
@@ -115,7 +122,7 @@ void randomize_graph(double p)
 void plant_clique(int k)
 {
 	static int indices[N]; // vertices indices, in no particular order
-	int vertices[k]; // vertices in the clique
+	int vertices[k]; // vertices in the clique; a proper index array
 
 	if (!indices[1]) {
 		// Initialize indices to {1, 2, ..., N-1}
@@ -156,6 +163,8 @@ int rand_under(int limit)
 	long bias_splits = rand_limit / limit;
 	long bias_limit = bias_splits * limit;
 
+	// If the random number doesn't fit in an even multiple of the limit, try
+	// again. This is fairly efficient except for large limits.
 	int rand;
 	do {
 		rand = (int)lrand48();
@@ -177,24 +186,25 @@ int ldr()
 	memset(V, false, N * sizeof (*V));
 	memset(G, true, N * sizeof (*G));
 
-	// I could optimize by saving degrees in an array and updating as I remove
-	// the vertices. Then I could store the degrees in advance, and copy that
-	// each time.
+	// Store the degrees in this array to save time.
+	static int deg[N];
+	reset_degrees(deg, GRAPH);
 
 	// Removal phase
 	while (!is_clique(G)) {
-		vertex u = min_deg(G);
-		V[u] = true;
-		G[u] = false;
+		vertex u = min_deg(deg, G);
+		add_vertex(u, V, NULL);
+		remove_vertex(u, G, deg);
 	}
 
 	// Inclusion phase
+	reset_degrees(deg, G);
 	int size_G = size(G);
 	for_vertices(v, V) {
 		// v is adjavent to all of G iff its degree in G is as large as G
-		if (deg(v, G) == size_G) {
-			G[v] = true;
+		if (deg[v] == size_G) {
 			size_G += 1;
+			add_vertex(v, G, deg);
 		}
 	}
 
@@ -202,14 +212,54 @@ int ldr()
 }
 
 /**
+ * Write to the given array the degrees in the given graph of all vertices.
+ */
+void reset_degrees(const subgraph G, int *deg) {
+	memset(deg, 0, N * sizeof (int));
+	for_vertices(u, G) {
+		for_neighbors(v, u) {
+			deg[v] += 1;
+		}
+	}
+}
+
+/**
+ * Add the given vertex to the given subgraph, updating the given degrees if
+ * not NULL.
+ */
+void add_vertex(vertex u, subgraph G, int *deg)
+{
+	G[u] = true;
+	if (deg != NULL) {
+		for_neighbors(v, u) {
+			deg[v] += 1;
+		}
+	}
+}
+
+/**
+ * Remove the given vertex from the given subgraph, updating the given degrees
+ * if not NULL.
+ */
+void remove_vertex(vertex u, subgraph G, int *deg)
+{
+	G[u] = false;
+	if (deg != NULL) {
+		for_neighbors(v, u) {
+			deg[v] -= 1;
+		}
+	}
+}
+
+/**
  * Find the index of the vertex of minimum degree in the given subgraph.
  */
-int min_deg(const subgraph G)
+int min_deg(const subgraph G, int *deg)
 {
 	int d_min = -1;
 	vertex u_min = -1;
 	for_vertices(u, G) {
-		int d = deg(u, G);
+		int d = deg[u];
 		if (d < d_min || d_min < 0) {
 			u_min = u;
 			d_min = d;
@@ -227,11 +277,6 @@ int deg(vertex u, const subgraph G)
 	for_neighbors(v, u, G) {
 		d += 1;
 	}
-	/*
-	for (int v = 0; v < N; ++v) {
-		d += contains(G, v) && adj(u, v);
-	}
-	*/
 	return d;
 }
 
@@ -258,10 +303,5 @@ int size(const subgraph G)
 	for_vertices(u, G) {
 		n += 1;
 	}
-	/*
-	for_vertices(u) {
-		n += contains(subgraph, u);
-	}
-	*/
 	return n;
 }
