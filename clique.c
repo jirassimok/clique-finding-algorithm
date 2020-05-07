@@ -87,14 +87,19 @@ int main(int argc, char *argv[])
 	int total_sizes[max_k + 1];
 
 	for (int k = min_k; k <= max_k; ++k) {
-		fprintf(stderr, "Running with %d-cliques.\n", k);
+		fprintf(stderr, "Running with %d-cliques.", k);
 
 		total_sizes[k] = 0;
-		dotimes(trials) {
+		for (int i = 1; i <= trials; ++i) {
+			if (i % 10 == 0) {
+				fprintf(stderr, "\rRunning with %d-cliques. %d ", k, i);
+			}
+
 			randomize_graph(0.5);
 			plant_clique(k);
 			total_sizes[k] += ldr();
 		}
+		fprintf(stderr, "\rRunning with %d-cliques. %d\n", k, trials);
 	}
 
 	for (int k = min_k; k <= max_k; ++k) {
