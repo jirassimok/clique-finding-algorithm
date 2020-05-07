@@ -188,17 +188,17 @@ int ldr()
 
 	// Store the degrees in this array to save time.
 	static int deg[N];
-	reset_degrees(deg, GRAPH);
+	reset_degrees(G, deg);
 
 	// Removal phase
 	while (!is_clique(G)) {
-		vertex u = min_deg(deg, G);
+		vertex u = min_deg(G, deg);
 		add_vertex(u, V, NULL);
 		remove_vertex(u, G, deg);
 	}
 
 	// Inclusion phase
-	reset_degrees(deg, G);
+	reset_degrees(G, deg);
 	int size_G = size(G);
 	for_vertices(v, V) {
 		// v is adjavent to all of G iff its degree in G is as large as G
@@ -214,7 +214,8 @@ int ldr()
 /**
  * Write to the given array the degrees in the given graph of all vertices.
  */
-void reset_degrees(const subgraph G, int *deg) {
+void reset_degrees(const subgraph G, int *deg)
+{
 	memset(deg, 0, N * sizeof (int));
 	for_vertices(u, G) {
 		for_neighbors(v, u) {
