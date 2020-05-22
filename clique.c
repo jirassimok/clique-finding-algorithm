@@ -76,18 +76,18 @@ int main(int argc, char *argv[])
 	READ_INT_ARG(2, min_k);
 	READ_INT_ARG(3, max_k);
 
-	printf("# Config: %d trials for each k from %d to %d\n", trials, min_k, max_k);
+	fprintf(stderr, "Config: %d trials for each k from %d to %d\n", trials, min_k, max_k);
 
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	srand48(now.tv_sec * 1000000 + now.tv_usec);
 
-	int total_sizes[max_k + 1];
+	double means[max_k + 1];
 
 	for (int k = min_k; k <= max_k; ++k) {
 		fprintf(stderr, "Running with %d-cliques.", k);
 
-		total_sizes[k] = 0;
+		int total_size = 0;
 		for (int i = 1; i <= trials; ++i) {
 			if (i % 10 == 0) {
 				fprintf(stderr, "\rRunning with %d-cliques. %d ", k, i);
@@ -95,15 +95,17 @@ int main(int argc, char *argv[])
 
 			randomize_graph(0.5);
 			plant_clique(k);
-			total_sizes[k] += ldr();
+			total_size += ldr();
 		}
-		fprintf(stderr, "\rRunning with %d-cliques. %d\n", k, trials);
+
+		means[k] = (double)total_size / (double)trials;
+		fprintf(stderr, "\rRunning with %d-cliques. Mean found: %f\n", k, means[k]);
 	}
 
+	// Print to stdout to save in a convenient format
+	printf("# Config: %d trials for each k from %d to %d\n", trials, min_k, max_k);
 	for (int k = min_k; k <= max_k; ++k) {
-		double mean = (double)total_sizes[k] / (double)trials;
-
-		printf("%d %f\n", k, mean);
+		printf("%d %f\n", k, means[k]);
 	}
 
 	return 0;
