@@ -1,0 +1,3 @@
+An implementation of the Low Degree Removal algorithm for finding planted cliques, described in section 3 of this paper:
+
+Uriel Feige, Dorit Ron. Finding hidden cliques in linear time. 21st International Meeting on Probabilistic, Combinatorial, and Asymptotic Methods in the Analysis of Algorithms (AofA'10), 2010, Vienna, Austria. pp.189-204. hal-01185601
