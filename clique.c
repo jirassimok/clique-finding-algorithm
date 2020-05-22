@@ -60,7 +60,14 @@ void reset_degrees(const subgraph, int*);
 void add_vertex(vertex, subgraph, int*);
 void remove_vertex(vertex, subgraph, int*);
 
-int deg(vertex, const subgraph);
+int deg_in(vertex, const subgraph);
+
+void assert(bool cond) {
+	if (!cond) {
+		printf("ASSERTION FAILED\n");
+		exit(1);
+	}
+}
 
 #define READ_INT_ARG(idx, name) \
 	if (argc > idx) \
@@ -214,12 +221,14 @@ int ldr()
 	reset_degrees(G, deg);
 	int size_G = size(G);
 	for_vertices(v, V) {
-		// v is adjavent to all of G iff its degree in G is as large as G
+		// v is adjacent to all of G iff its degree in G is as large as G
 		if (deg[v] == size_G) {
 			size_G += 1;
 			add_vertex(v, G, deg);
 		}
 	}
+
+	assert(is_clique(G));
 
 	return size_G;
 }
@@ -285,7 +294,7 @@ int min_deg(const subgraph G, int *deg)
 /**
  * Get the degree of the given vertex in the given subgraph.
  */
-int deg(vertex u, const subgraph G)
+int deg_in(vertex u, const subgraph G)
 {
 	int d = 0;
 	for_neighbors(v, u, G) {
