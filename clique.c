@@ -5,6 +5,8 @@
  *
  * Find cliques in a graph with a planted clique.
  *
+ * Compile this program with 'gcc -Wall -Wextra -O3 --std=c99 clique.c'
+ *
  * In this program, the graph has constant size and is represented as an
  * adjacency matrix.
  *
