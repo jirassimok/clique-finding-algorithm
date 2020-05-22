@@ -161,17 +161,18 @@ void plant_clique(int k)
  */
 int rand_under(int limit)
 {
-	const long rand_limit = 1L << 31;  // lrand48 generates on [0, 2^32 - 1]
+	const long rand_limit = 1L << 31;  // lrand48 generates on [0, 2^31 - 1]
 
 	long bias_splits = rand_limit / limit;
 	long bias_limit = bias_splits * limit;
 
 	// If the random number doesn't fit in an even multiple of the limit, try
-	// again. This is fairly efficient except for large limits.
+	// again. This is largely efficient, with worst case expected tries
+	// slightly below 2 when the limit is just under half of rand_limit.
 	int rand;
 	do {
 		rand = (int)lrand48();
-	} while (rand > bias_limit);
+	} while (rand >= bias_limit);
 
 	return rand / bias_splits;
 }
