@@ -82,10 +82,6 @@ int main(int argc, char *argv[])
 	gettimeofday(&now, NULL);
 	srand48(now.tv_sec * 1000000 + now.tv_usec);
 
-	randomize_graph(0.5);
-
-	// TODO: Plant a k-clique in the graph
-
 	int total_sizes[max_k + 1];
 
 	for (int k = min_k; k <= max_k; ++k) {
