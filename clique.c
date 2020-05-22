@@ -83,11 +83,14 @@ int main(int argc, char *argv[])
 	srand48(now.tv_sec * 1000000 + now.tv_usec);
 
 	double means[max_k + 1];
+	double success_rates[max_k + 1];
 
 	for (int k = min_k; k <= max_k; ++k) {
 		fprintf(stderr, "Running with %d-cliques.", k);
 
 		int total_size = 0;
+		int successes = 0;
+
 		for (int i = 1; i <= trials; ++i) {
 			if (i % 10 == 0) {
 				fprintf(stderr, "\rRunning with %d-cliques. %d ", k, i);
@@ -95,17 +98,20 @@ int main(int argc, char *argv[])
 
 			randomize_graph(0.5);
 			plant_clique(k);
-			total_size += ldr();
+			int found = ldr();
+			total_size += found;
+			successes += (found == k);
 		}
 
+		success_rates[k] = (double)successes / (double)trials;
 		means[k] = (double)total_size / (double)trials;
-		fprintf(stderr, "\rRunning with %d-cliques. Mean found: %f\n", k, means[k]);
+		fprintf(stderr, "\rRunning with %d-cliques. Mean found: %f (success rate %f)\n", k, means[k], success_rates[k]);
 	}
 
 	// Print to stdout to save in a convenient format
 	printf("# Config: %d trials for each k from %d to %d\n", trials, min_k, max_k);
 	for (int k = min_k; k <= max_k; ++k) {
-		printf("%d %f\n", k, means[k]);
+		printf("%d %f %f\n", k, means[k], success_rates[k]);
 	}
 
 	return 0;
