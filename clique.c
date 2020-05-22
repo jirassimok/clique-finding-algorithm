@@ -128,7 +128,7 @@ void plant_clique(int k)
 	int vertices[k]; // vertices in the clique; a proper index array
 
 	if (!indices[1]) {
-		// Initialize indices to {1, 2, ..., N-1}
+		// Initialize indices to {0, 1, ..., N-1}
 		// This only ever must be done once; the list can be in any order
 		for (int i = 0; i < N; ++i) {
 			indices[i] = i;
