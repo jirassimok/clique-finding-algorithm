@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	READ_INT_ARG(2, min_k);
 	READ_INT_ARG(3, max_k);
 
-	printf("check %d %d %d %d\n", argc, trials, min_k, max_k);
+	printf("# Config: %d trials for each k from %d to %d\n", trials, min_k, max_k);
 
 	struct timeval now;
 	gettimeofday(&now, NULL);
@@ -126,6 +126,7 @@ void plant_clique(int k)
 {
 	static int indices[N]; // vertices indices, in no particular order
 	int vertices[k]; // vertices in the clique; a proper index array
+	// TODO: the vertices array isn't necessary; after the shuffle it's the first k elements of the other array
 
 	if (!indices[1]) {
 		// Initialize indices to {0, 1, ..., N-1}
